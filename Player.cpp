@@ -3,6 +3,7 @@
 using namespace std;
 using namespace ariel;
 
+
 void Player::initCards()
 {
     this->cards["knight card"] = 0;
@@ -272,20 +273,6 @@ void Player::useMonopolyCard(vector<Player *> players, string resource, Catan *c
     }
 }
 
-void Player::useBuildRoadsCard(size_t edgeNum1, size_t edgeNum2, Board *b, Catan *catan)
-{
-    if (this->cards["build roads card"] == 0)
-    {
-        throw invalid_argument("No build roads cards");
-    }
-    else
-    {
-        cout << this->name << "used build roads card" << endl;
-        placeTwoRoadsBuildCard(edgeNum1, edgeNum2, b);
-        this->cards["build roads card"]--;
-        catan->turnSwitch();
-    }
-}
 
 bool Player::checkEdgeNearEdge(size_t edgeNum, Board *b)
 {
@@ -326,39 +313,6 @@ bool Player::checkEdgeNearEdge(size_t edgeNum, Board *b)
     return false;
 }
 
-void Player::placeRoad(size_t edgeNum, Board *b)
-{
-    bool isValid = false;
-    if (this->resources["brick"] == 0 || this->resources["wood"] == 0)
-    {
-        throw invalid_argument("not enough resources");
-    }
-    else if (b->getEdges()[edgeNum]->getPlayer() != nullptr)
-    {
-        throw invalid_argument("edge isn't available");
-    }
-    else
-    {
-        if ((b->getEdges()[edgeNum]->getV1()->getPlayer() == this ||
-             b->getEdges()[edgeNum]->getV2()->getPlayer() == this) || // there's a near settlement
-            checkEdgeNearEdge(edgeNum, b))
-        {
-            isValid = true;
-        }
-        if (isValid == false)
-        {
-            throw invalid_argument("edge needs to be next to your settlement/road ");
-        }
-        else if (isValid == true)
-        {
-            this->reduceResource("brick", 1);
-            this->reduceResource("wood", 1);
-            b->getEdges()[edgeNum]->setPlayer(this);
-            cout << this->name << " added road in edge number " << edgeNum << endl;
-        }
-    }
-}
-
 void Player::placeTwoRoadsBuildCard(size_t edgeNum1, size_t edgeNum2, Board *b)
 {
     bool isValid = false;
@@ -387,6 +341,7 @@ void Player::placeTwoRoadsBuildCard(size_t edgeNum1, size_t edgeNum2, Board *b)
                 isValid = true;
             }
         }
+
         if (isValid == false)
         {
             throw invalid_argument("edge needs to be next to your settlement/road ");
@@ -399,6 +354,56 @@ void Player::placeTwoRoadsBuildCard(size_t edgeNum1, size_t edgeNum2, Board *b)
         }
     }
 }
+
+void Player::useBuildRoadsCard(size_t edgeNum1, size_t edgeNum2, Board *b, Catan *catan)
+{
+    if (this->cards["build roads card"] == 0)
+    {
+        throw invalid_argument("No build roads cards");
+    }
+    else
+    {
+        cout << this->name << "used build roads card" << endl;
+        placeTwoRoadsBuildCard(edgeNum1, edgeNum2, b);
+        this->cards["build roads card"]--;
+        catan->turnSwitch();
+    }
+}
+
+void Player::placeRoad(size_t edgeNum, Board *b)
+{
+    bool isValid = false;
+    if (this->resources["brick"] == 0 || this->resources["wood"] == 0)
+    {
+        throw invalid_argument("not enough resources");
+    }
+    else if (b->getEdges()[edgeNum]->getPlayer() != nullptr)
+    {
+        throw invalid_argument("edge isn't available");
+    }
+    else
+    {
+        if ((b->getEdges()[edgeNum]->getV1()->getPlayer() == this ||
+             b->getEdges()[edgeNum]->getV2()->getPlayer() == this) || // there's a near settlement
+            checkEdgeNearEdge(edgeNum, b))
+        {
+            isValid = true;
+        }
+
+        if (isValid == false)
+        {
+            throw invalid_argument("edge needs to be next to your settlement/road ");
+        }
+        else if (isValid == true)
+        {
+            this->reduceResource("brick", 1);
+            this->reduceResource("wood", 1);
+            b->getEdges()[edgeNum]->setPlayer(this);
+            cout << this->name << " added road in edge number " << edgeNum << endl;
+        }
+    }
+}
+
 
 bool Player::checkDistance(size_t vertexNum, Board *b)
 {
@@ -460,7 +465,7 @@ void Player::placeSettlement(size_t vertexNum, Board *b)
             b->setPlayerAtVertex(vertexNum, this);
             b->setTypeAtVertex(vertexNum, "settlement");
             this->points++;
-            cout << this->name << " added setttlement in vertex number " << vertexNum << " and 1 point was added to him" << endl;
+            cout << this->name << " added settlement in vertex number " << vertexNum << " and 1 point was added to him" << endl;
         }
     }
 }
@@ -474,6 +479,9 @@ void Player::placeCity(size_t vertexNum, Board *b)
     else if (this->resources["grain"] < 2 || this->resources["iron"] < 3)
     {
         throw invalid_argument("not enough resources");
+    }
+    else if(b->getVertices()[vertexNum]->getPlayer() == nullptr){
+        throw invalid_argument("cities are built only on settlements");
     }
     else
     {

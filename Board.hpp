@@ -31,6 +31,7 @@ namespace ariel
         void initVertices();
         void initEdges();
         void initTiles();
+        ~Board();
         vector<Vertex *> getVertices();
         vector<Edge *> getEdges();
         vector<Tile *> getTiles();

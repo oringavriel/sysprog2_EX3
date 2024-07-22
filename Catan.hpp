@@ -26,6 +26,7 @@ namespace ariel
         Catan(Player &p1, Player &p2, Player &p3);
         void setCards();
         void setBoard();
+        ~Catan();
         Board *getBoard();
         Cards *getCards();
         vector<Player *> getPlayers();

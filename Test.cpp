@@ -118,11 +118,14 @@ TEST_CASE("test player init getters and setters")
     Vertex::resetIdCount();
     Edge::resetIdCount();
     Tile::resetIdCount();
-    Board *b = new Board();
     Player p1("dan");
+    Player p2("omer");
+    Player p3("michael");
+    Catan catan(p1, p2, p3);
+    Board *b = catan.getBoard();
     p1.addResource("wood", 1);
     CHECK(p1.getResources()["wood"] == 1);
-    CHECK_THROWS(p1.reduceResource("wood", 2));
+    CHECK_THROWS(p1.reduceResource("wood", 2)); // test reduce more than what player has
     p1.reduceResource("wood", 1);
     CHECK(p1.getResources()["wood"] == 0);
 }
@@ -132,8 +135,11 @@ TEST_CASE("test player place first settlements and roads")
     Vertex::resetIdCount();
     Edge::resetIdCount();
     Tile::resetIdCount();
-    Board *b = new Board();
     Player p1("dan");
+    Player p2("omer");
+    Player p3("michael");
+    Catan catan(p1, p2, p3);
+    Board *b = catan.getBoard();
     p1.placeFirstSettlemnts(4, 14, b);
     CHECK(p1.getPoints() == 2);
     CHECK(b->getVertices()[4]->getPlayer()->getName() == "dan");
@@ -141,10 +147,9 @@ TEST_CASE("test player place first settlements and roads")
     CHECK(p1.getResources()["wool"] == 2);
     CHECK(p1.getResources()["brick"] == 1);
     CHECK(p1.getResources()["wood"] == 1);
-    Player p2("michael");
-    CHECK_THROWS(p2.placeFirstSettlemnts(2, 4, b));
+    CHECK_THROWS(p2.placeFirstSettlemnts(2, 4, b)); // test p2 place first settlements in taken vertex 
     p2.placeFirstSettlemnts(15, 2, b);
-    CHECK_THROWS(p1.placeFirstRoads(1, 42, b));
+    CHECK_THROWS(p1.placeFirstRoads(1, 42, b)); // test p1 place first roads in not close edge
     p1.placeFirstRoads(1, 15, b);
     CHECK(b->getEdges()[1]->getPlayer() == &p1);
     p2.placeFirstRoads(5, 17, b);
@@ -165,13 +170,13 @@ TEST_CASE("test init of cardspack and usage")
     p1.addResource("grain", 3);
     p1.buyCard(*catan.getCards());
     p1.buyCard(*catan.getCards());
-    CHECK_THROWS(p1.buyCard(*catan.getCards()));
+    CHECK_THROWS(p1.buyCard(*catan.getCards())); // test when player doesn't have enough resources
     p1.printResourceMap();
     p1.printCardMap();
 
     SUBCASE("test useVictoryPointCard")
     {
-        CHECK_THROWS(p1.useVictoryPointCard(&catan));
+        CHECK_THROWS(p1.useVictoryPointCard(&catan)); //test when player doesn't have this card
         p1.addCard("victory point card", 1);
         CHECK((p1.getCards()["victory point card"] == 1) == true);
         catan.setCurrent(&p1);
@@ -182,7 +187,7 @@ TEST_CASE("test init of cardspack and usage")
 
     SUBCASE("test useYearOfPlentyCard(")
     {
-        CHECK_THROWS(p1.useYearOfPlentyCard("wood", "wool", &catan));
+        CHECK_THROWS(p1.useYearOfPlentyCard("wood", "wool", &catan)); //test when player doesn't have this card
         p1.addCard("year of plenty card", 1);
         catan.setCurrent(&p1);
         p1.useYearOfPlentyCard("wood", "wool", &catan);
@@ -196,7 +201,7 @@ TEST_CASE("test init of cardspack and usage")
         p2.addResource("wood", 2);
         p3.addResource("wool", 2);
         vector<Player *> players = catan.getPlayers();
-        CHECK_THROWS(p1.useMonopolyCard(players, "wood", &catan));
+        CHECK_THROWS(p1.useMonopolyCard(players, "wood", &catan));//test when player doesn't have this card
         p1.addCard("monopoly card", 1);
         CHECK(p1.getCards()["monopoly card"] == 1);
         catan.setCurrent(&p1);
@@ -207,7 +212,7 @@ TEST_CASE("test init of cardspack and usage")
 
     SUBCASE("test useBuildRoadsCard")
     {
-        CHECK_THROWS(p1.useBuildRoadsCard(14, 2, b, &catan));
+        CHECK_THROWS(p1.useBuildRoadsCard(14, 2, b, &catan));//test when player doesn't have this card
         p2.addCard("build roads card", 1);
         CHECK(p1.getCards()["build roads card"] == 1);
         p2.placeFirstSettlemnts(7, 4, b);
@@ -326,7 +331,7 @@ TEST_CASE("test place settlement and place city")
     p2.placeRoad(24, b);
     p2.placeSettlement(16, b);
     p2.placeRoad(18, b);
-    CHECK_THROWS(p2.placeSettlement(11, b));
+    CHECK_THROWS(p2.placeSettlement(11, b)); // placing noy by law of distance
 
     SUBCASE("not enough resources")
     {
@@ -352,7 +357,7 @@ TEST_CASE("test roll dice")
     catan.chooseStartingPlayer();
     p1.rollDice(&catan);
     catan.turnSwitch();
-    CHECK_THROWS(p3.rollDice(&catan));
+    CHECK_THROWS(p3.rollDice(&catan));// test not p3 turn
     p2.rollDice(&catan);
 
     SUBCASE("test sevenDice")

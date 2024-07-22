@@ -23,6 +23,12 @@ Catan::Catan(Player &p1, Player &p2, Player &p3)
     setBoard();
     setCards();
 }
+
+Catan::~Catan(){
+    delete this->cards;
+    delete this->board;
+
+}
 Board *Catan::getBoard()
 {
     return this->board;
@@ -67,6 +73,12 @@ void Catan::turnSwitch()
         }
     }
 }
+
+void Catan::printVictory(Player *player)
+{
+    cout << player->getName() << " won the game" << endl;
+}
+
 bool Catan::victory(Player *player)
 {
     if (player->getPoints() >= 10)
@@ -76,10 +88,7 @@ bool Catan::victory(Player *player)
     }
     return false;
 }
-void Catan::printVictory(Player *player)
-{
-    cout << player->getName() << " won the game" << endl;
-}
+
 
 void Catan::sevenDice()
 {

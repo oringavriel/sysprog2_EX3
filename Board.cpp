@@ -162,6 +162,28 @@ Board::Board()
     initEdges();
     initTiles();
 }
+
+Board::~Board()
+{
+    for (auto vertex : vertices)
+    {
+        delete vertex;
+    }
+    vertices.clear();
+
+    for (auto edge : edges)
+    {
+        delete edge;
+    }
+    edges.clear();
+
+    for (auto tile : tiles)
+    {
+        delete tile;
+    }
+    tiles.clear();
+}
+
 vector<Vertex *> Board::getVertices()
 {
     return this->vertices;
